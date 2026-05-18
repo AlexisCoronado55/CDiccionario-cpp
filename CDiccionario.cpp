@@ -593,3 +593,201 @@ void CDiccionario::eliminaRegistro(){
 void CDiccionario::modificaRegistro(){
     printf("\nModificar registro...");
 }
+
+//Funciones de bloques
+
+void *CDiccionario::capturaBloque(){
+    void *bloque = malloc(tambloque);
+    long desp = 0;
+
+    // inicializar sig en -1
+    *(long *)((char *)bloque + desp) = -1;
+    desp += sizeof(long);
+
+    for(int i = 0; i < nAtributos; i++){
+        switch(arrAtributo[i].tipo){
+            case 1: // char/cadena
+                printf("Ingresa %s: ", arrAtributo[i].nombre);
+                scanf(" %[^\n]", (char *)bloque + desp);
+                break;
+            case 2: // int
+                printf("Ingresa %s: ", arrAtributo[i].nombre);
+                scanf("%d", (int *)((char *)bloque + desp));
+                break;
+            case 3: // float
+                printf("Ingresa %s: ", arrAtributo[i].nombre);
+                scanf("%f", (float *)((char *)bloque + desp));
+                break;
+            case 4: // double
+                printf("Ingresa %s: ", arrAtributo[i].nombre);
+                scanf("%lf", (double *)((char *)bloque + desp));
+                break;
+            case 5: // long
+                printf("Ingresa %s: ", arrAtributo[i].nombre);
+                scanf("%ld", (long *)((char *)bloque + desp));
+                break;
+        }
+        desp += arrAtributo[i].tamano;
+    }
+    return bloque;
+}
+
+int CDiccionario::comparaBloques(void *b1, void *b2){
+    long desp = sizeof(long); // saltarse el sig, comparar desde el KP
+    switch(arrAtributo[0].tipo){
+        case 1:
+            return strcmp((char *)b1 + desp, (char *)b2 + desp);
+        case 2:
+            return *(int *)((char *)b1 + desp) - *(int *)((char *)b2 + desp);
+        case 3:
+            return (*(float *)((char *)b1+desp) > *(float *)((char *)b2+desp))
+                 - (*(float *)((char *)b1+desp) < *(float *)((char *)b2+desp));
+        case 4:
+            return (*(double *)((char *)b1+desp) > *(double *)((char *)b2+desp))
+                 - (*(double *)((char *)b1+desp) < *(double *)((char *)b2+desp));
+        case 5:
+            return (*(long *)((char *)b1+desp) > *(long *)((char *)b2+desp))
+                 - (*(long *)((char *)b1+desp) < *(long *)((char *)b2+desp));
+    }
+    return 0;
+}
+
+void CDiccionario::altaBloque()
+{
+    void *nuevo = capturaBloque();
+    if (buscaBloque(nuevo) == -1)
+    {
+        long dir = escribeBloque(nuevo);
+        insertaBloque(nuevo, dir);
+    }
+    else
+    {
+        cout << "Error: el bloque ya existe";
+    }
+}
+
+void *CDiccionario::leeBloque(long dir){
+    void *bloque = malloc(tambloque);
+    fseek(archivo, dir, SEEK_SET);
+    fread(bloque, tambloque, 1, archivo);
+    return bloque;
+}
+
+void CDiccionario::reescribeBloque(void *bloque, long dir){
+    fseek(archivo, dir, SEEK_SET);
+    fwrite(bloque, tambloque, 1, archivo);
+}
+
+void CDiccionario::reescribeBloque(void *bloque, long dir)
+{
+    fseek(arch, dir, SEEK_SET);
+    fwrite(bloque, tamBloque, 1, arch);
+}
+
+void CDiccionario::insertaBloque(void *nvo, long dirnvo){
+    if(activa.data == -1){
+        activa.data = dirnvo;
+        reescribeEntidad(diractiva, activa);
+    }else{
+        void *act = leeBloque(activa.data);
+        if(comparaBloques(nvo, act) < 0){
+            *(long *)((char *)nvo) = activa.data;
+            reescribeBloque(nvo, dirnvo);
+            activa.data = dirnvo;
+            reescribeEntidad(diractiva, activa);
+            free(act);
+        }else{
+            long cab = activa.data;
+            long dirant;
+            void *bloqueant;
+            while(cab != -1 && comparaBloques(nvo, act) > 0){
+                dirant = cab;
+                bloqueant = act;
+                cab = *(long *)((char *)act);
+                if(cab != -1) act = leeBloque(cab);
+            }
+            *(long *)((char *)nvo) = cab;
+            reescribeBloque(nvo, dirnvo);
+            *(long *)((char *)bloqueant) = dirnvo;
+            reescribeBloque(bloqueant, dirant);
+            free(bloqueant);
+        }
+    }
+}
+
+void CDiccionario::eliminaBloque(){
+    cargaAtributos();
+    void *llave = capturaBloque();
+
+    if(activa.data == -1){
+        printf("\nError: no hay bloques.\n");
+        free(llave); return;
+    }
+
+    void *act = leeBloque(activa.data);
+    if(comparaBloques(llave, act) == 0){
+        activa.data = *(long *)((char *)act);
+        reescribeEntidad(diractiva, activa);
+        free(act); free(llave); return;
+    }
+
+    long dirant = activa.data;
+    void *bloqueant = act;
+    long cab = *(long *)((char *)act);
+
+    while(cab != -1){
+        act = leeBloque(cab);
+        if(comparaBloques(llave, act) == 0){
+            *(long *)((char *)bloqueant) = *(long *)((char *)act);
+            reescribeBloque(bloqueant, dirant);
+            free(act); free(bloqueant); free(llave);
+            printf("\nBloque eliminado.\n");
+            return;
+        }
+        free(bloqueant);
+        dirant = cab;
+        bloqueant = act;
+        cab = *(long *)((char *)act);
+    }
+    printf("\nError: bloque no encontrado.\n");
+    free(bloqueant); free(llave);
+}
+
+void CDiccionario::modificaBloque(){
+    cargaAtributos();
+    void *llave = capturaBloque(); // captura solo KP para buscar
+
+    long dir = buscaBloque(llave);
+    if(dir == -1){
+        printf("\nError: bloque no encontrado.\n");
+        free(llave); return;
+    }
+
+    void *bloque = leeBloque(dir);
+    long desp = sizeof(long) + arrAtributo[0].tamano; // saltar sig + KP
+
+    for(int i = 1; i < nAtributos; i++){
+        printf("Nuevo valor para %s: ", arrAtributo[i].nombre);
+        switch(arrAtributo[i].tipo){
+            case 1:
+                scanf(" %[^\n]", (char *)bloque + desp);
+                break;
+            case 2:
+                scanf("%d", (int *)((char *)bloque + desp));
+                break;
+            case 3:
+                scanf("%f", (float *)((char *)bloque + desp));
+                break;
+            case 4:
+                scanf("%lf", (double *)((char *)bloque + desp));
+                break;
+            case 5:
+                scanf("%ld", (long *)((char *)bloque + desp));
+                break;
+        }
+        desp += arrAtributo[i].tamano;
+    }
+    reescribeBloque(bloque, dir);
+    free(bloque); free(llave);
+    printf("\nBloque modificado.\n");
+}

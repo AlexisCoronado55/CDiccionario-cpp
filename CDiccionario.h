@@ -81,4 +81,16 @@ public:
     void consultarRegistro();
     void eliminaRegistro();
     void modificaRegistro();
+
+    // Funciones de bloques
+    void *CDiccionario::capturaBloque();
+    int CDiccionario::comparaBloques(void *b1, void *b2);
+    void CDiccionario::altaBloque();
+    void *CDiccionario::leeBloque(long dir);
+    long CDiccionario::escribeBloque(void *bloque);
+    void CDiccionario::reescribeBloque(void *bloque, long dir);
+    void CDiccionario::insertaBloque(void *nvo, long dirnvo);
+    void CDiccionario::eliminaBloque();
+    void CDiccionario::modificaBloque();
+
 };

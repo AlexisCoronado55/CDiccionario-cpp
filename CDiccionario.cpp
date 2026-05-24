@@ -1,25 +1,57 @@
 #include "CDiccionario.h"
-//Coronado Y Costilla Cerino Alexis y Pablo Zahir Casas Campos
+#include "CDiccionario.h"
+#include <iostream>
+#define RESET   "\033[0m"
+#define ROJO    "\033[31m"
+#define AZUL    "\033[34m"
+#define CIAN    "\033[36m"
+#define VERDE   "\033[32m"
 
-// Inicializo los punteros y variables de la clase, y mando a llamar al menu principal.
-CDiccionario::CDiccionario(){
+///Coronado Y Costilla Cerino Alexis
+///Pablo Zahir Casas Campos
+
+CDiccionario::CDiccionario()
+{
     archivo=NULL;
     nAtributos=0;
     tambloque=0;
     menuPrincipal();
 }
 
+CDiccionario::~CDiccionario()
+{
+
+}
+
+
+using namespace std;
+
 // Muestro las opciones principales para crear, abrir o salir del diccionario.
 void CDiccionario::menuPrincipal(){
-    int op;
+    int op,valido;
+    std::cout << CIAN << "\tDiccionario" << RESET <<  std::endl;
     do{
-        printf("\nQue desea hacer:\n1.Nuevo diccionario\n2.Abrir diccionario\n3.Salir\n");
-        scanf("%d",&op);
+        printf("\n---------------------------------");
+        printf("\n\tQue desea hacer:\n \n \t1.Nuevo diccionario\n \t2.Abrir diccionario\n \t3.Salir\n\n>>\t");
+        //printf("\n---------------------------------\n>>\t");
+        valido = scanf("%d", &op);
+        //printf("\n---------------------------------");
+
+        if (valido != 1) {
+        printf("\nError: solo se aceptan numeros.\n");
+        scanf("%*[^\n]");
+        scanf("%*c");
+        op = 0;
+        } else if (op < 1 || op > 3)
+        {
+            printf("\nLa opcion %d no existe, por favor selecciona otra opcion-\n", op);
+        }
+
         switch(op){
-            case 1: nuevoDiccionario(); break;
-            case 2: abrirDiccionario(); break;
-            case 3: printf("\nSaliendo..."); break;
-            default: printf("\nNo es una opcion");
+            case 1: printf("\n> Nuevo Diccionario\n");nuevoDiccionario(); break;
+            case 2: printf("\n> Abrir Diccionario\n");abrirDiccionario(); break;
+            case 3: std::cout << VERDE << "\n\t\tSaliendo..." << RESET << std::endl; break;
+            default: std::cout << ROJO << "\nNo es una opcion valida" << RESET << std::endl;
         }
     }while(op!=3);
 }
@@ -44,83 +76,108 @@ void CDiccionario::nuevoDiccionario(){
         escribeCabEntidades(-1);
         MenuEntidades();
         fclose(archivo);
+        archivo = NULL;
     }
 }
 
 // Intento abrir un archivo existente en modo lectura/escritura y abro el menu de entidades.
 void CDiccionario::abrirDiccionario(){
     char nombre[50];
-    printf("\nNombre del archivo: ");
+    printf("\nNombre del archivo que deseas abrir: ");
     scanf("%s",nombre);
     archivo=fopen(nombre,"rb+");
-    if(archivo!=NULL){
-        printf("\nArchivo abierto correctamente");
+    if(archivo!= NULL){
+        std::cout << VERDE << "\nArchivo abierto correctamente" << RESET << std::endl;
+        //printf("\nArchivo abierto correctamente\n");
         MenuEntidades();
         fclose(archivo);
     }else{
-        printf("\nNo existe el archivo");
+        std::cout << ROJO << "\nNo existe el archivo" << RESET << std::endl;
     }
 }
-
+///--------------------------------------------------------------------MENU ENTIDADES------------------------------------------------------------------------------------
 // Muestro las opciones para gestionar las entidades y mando a llamar las funciones correspondientes.
 void CDiccionario::MenuEntidades(){
     int op;
     do{
-        printf("\n1.Nueva 2.Consultar 3.Eliminar 4.Modificar 5.Atributos 6.Datos 7.Regresar\n");
+        printf("\n---------------------------------");
+        std::cout << CIAN << "\n>>\tMenu Entidades" << RESET <<  std::endl;
+        printf("\n \t1.Nueva\n \t2.Consultar\n \t3.Eliminar\n \t4.Modificar\n \t5.Atributos\n \t6.Datos\n \t7.Regresar\n\n>>\t");
+        //printf("---------------------------------\n>>\t ");
         scanf("%d",&op);
+        //printf("---------------------------------\n ");
+
         switch(op){
-            case 1: altaEntidad(); break;
-            case 2: consultarEntidades(); break;
-            case 3: bajaEntidad(); break;
-            case 4: modificaEntidad(); break;
-            case 5: menuAtributos(); break;
-            case 6: menuDatos(); break;
-            case 7: printf("\nRegresando..."); break;
-            default: printf("\nOpcion no valida");
+            case 1: printf("\n>Nueva Entidad\n");altaEntidad(); break;
+            case 2: printf("\n> Consultar Entidad\n");consultarEntidades(); break;
+            case 3: printf("\n> Eliminar Entidad\n");bajaEntidad(); break;
+            case 4: printf("\n> Modificar Entidad\n");modificaEntidad(); break;
+            case 5: printf("\n> Atributos\n");menuAtributos(); break;
+            // preguntar con que entidad se quiere trabajar
+            case 6:printf("\n> Datos"); menuDatos();
+                    break;
+            case 7: std::cout << VERDE << "\n\t\tRegresando..." << RESET << std::endl; break;
+            default: std::cout << ROJO << "\n\t\tOpcion no valida..." << RESET << std::endl;
         }
     }while(op!=7);
 }
 
-// ---------------- ATRIBUTOS ----------------
 
-// Verifico que haya una entidad activa y muestro el menu para gestionar sus atributos.
+
+/// -------------------------------------------------------------- MENU ATRIBUTOS ------------------------------------------------------------------------------------------------
+
+/// Verifico que haya una entidad activa y muestro el menu para gestionar sus atributos.
 void CDiccionario::menuAtributos(){
     if(!activarEntidad()) return;
 
     int op;
     do{
-        printf("\n1.Nuevo 2.Consultar 3.Eliminar 4.Modificar 5.Regresar\n");
+        printf("\n---------------------------------");
+        std::cout << CIAN << "\n>>\tMenu Atributo" << RESET <<  std::endl;
+        printf("\n \t1.Nuevo \n \t2.Consultar \n \t3.Eliminar \n \t4.Modificar \n \t5.Regresar\n\n>>\t");
+        //printf("---------------------------------\n>>\t ");
         scanf("%d",&op);
         switch(op){
             case 1: nuevoAtributo(); break;
             case 2: consultarAtributo(); break;
-            case 3: bajaAtributo(); break;
-            case 4: modificaAtributo(); break;
-            case 5: printf("\nRegresando..."); break;
-            default: printf("\nOpcion no valida");
+            case 3: if(activa.data != -1)
+                        std::cout << ROJO << "\n\t\tEROOR!! la entidad ya tiene registros, no se puede eliminar\n" << RESET << std::endl;
+                    else
+                        bajaAtributo();
+                    break;
+            case 4:  if(activa.data != -1)
+                        std::cout << ROJO << "\n\t\tEROOR!! la entidad ya tiene registros, no se puede eliminar\n" << RESET << std::endl;
+                    else
+                        modificaAtributo();
+                    break;
+            case 5: std::cout << VERDE << "\n\t\tRegresando..." << RESET << std::endl; break;
+            default: std::cout << ROJO << "\n\t\tOpcion no valida..." << RESET << std::endl;
         }
     }while(op!=5);
 }
 
-// ---------------- DATOS ----------------
+///------------------------------------------------------- MENU DATOS -----------------------------------------------------------------------------------------------------------
 
 // Muestro el menu para gestionar los registros de informacion.
 void CDiccionario::menuDatos(){
     int op;
     do{
-        printf("\n1.Nuevo 2.Consultar 3.Eliminar 4.Modificar 5.Regresar\n");
+        printf("\n---------------------------------");
+        std::cout << CIAN << "\n>>\tMenu Datos" << RESET <<  std::endl;
+        printf("\n \t1.Nuevo \n \t2.Consultar \n \t3.Eliminar \n \t4.Modificar \n \t5.Regresar\n");
+        //printf("---------------------------------\n>>\t ");
         scanf("%d",&op);
         switch(op){
-            case 1: nuevoRegistro(); break;
-            case 2: consultarRegistro(); break;
-            case 3: eliminaRegistro(); break;
-            case 4: modificaRegistro(); break;
-            case 5: printf("\nRegresando..."); break;
-            default: printf("\nOpcion no valida");
+            case 1: printf("\n> Nuevo Registro");altaBloque(); break;
+            case 2: printf("\n> Consulta Registro"); consultaBloques(); break;
+            case 3: printf("\n> Elimina Registro"); //eliminaBloque(void *bloq); break;
+            case 4:printf("\n> Modifica Registro"); modificaBloque();break;
+            case 5: std::cout << VERDE << "\n\t\tRegresando..." << RESET << std::endl; break;
+            default: std::cout << ROJO << "\n\t\tOpcion no valida..." << RESET << std::endl;
         }
     }while(op!=5);
 }
-
+///--------------------------------------------------------- ENTIDADES ----------------------------------------------------------------------
 // Me muevo al inicio del archivo y guardo la direccion de la cabecera de las entidades.
 void CDiccionario::escribeCabEntidades(long cab){
     fseek(archivo,0,SEEK_SET);
@@ -136,7 +193,7 @@ void CDiccionario::altaEntidad(){
         dir=escribeEntidad(nueva);
         insertaEntidad(nueva,dir);
     }else{
-        printf("Error: La entidad ya existe");
+        std::cout << ROJO << "\n\tError: La entidad ya existe" << RESET << std::endl;
     }
 }
 
@@ -145,6 +202,7 @@ Entidad CDiccionario::capturaEntidad(){
     Entidad ent;
     printf("\nNombre de la entidad: ");
     scanf(" %[^\n]",ent.nombre);
+    printf("\n");
     ent.atr=-1;
     ent.sig=-1;
     ent.data=-1;
@@ -222,14 +280,15 @@ void CDiccionario::bajaEntidad(){
     long dir;
     char nom[30];
 
-    printf("Ingrese nombre: ");
+    printf("\nIngrese entidad >>\t ");
     scanf("%s",nom);
 
     Entidad aux;
     strcpy(aux.nombre,nom);
     dir=buscaEntidad(aux);
 
-    if(dir==-1) printf("ERROR");
+    if(dir==-1)
+        std::cout << ROJO << "\n\tERROR!! la entidad no puede borrarse " << RESET << std::endl;
     else eliminaEntidad(nom);
 }
 
@@ -255,7 +314,8 @@ long CDiccionario::eliminaEntidad(cadena nom){
             ant.sig=le.sig;
             reescribeEntidad(dirant,ant);
             return cab;
-        }else return -1;
+        }else
+            return -1;
     }
 }
 
@@ -274,49 +334,15 @@ void CDiccionario::modificaEntidad(){
             dir=eliminaEntidad(aux.nombre);
             reescribeEntidad(dir,nueva);
             insertaEntidad(nueva,dir);
-        }else printf("No se puede actualizar");
-    }else printf("No existe la entidad");
+        }else
+            std::cout << ROJO << "\n\tNo se puede actualizar" << RESET << std::endl;
+    }else
+        std::cout << ROJO << "\n\tNo existe la entidad" << RESET << std::endl;
 }
 
-// ---------------- REGISTROS ----------------
 
-// Creo un bloque de memoria para acomodar el registro de un paciente y lo estampo al final del archivo.
-void CDiccionario::nuevoRegistro(){
-    if(!archivo){
-        printf("\nPrimero crea o abre un archivo");
-        return;
-    }
+/// ---------------------------------------------------------------------- REGISTROS ------------------------------------------------------------------------------------------------
 
-    int total=(TAM*sizeof(char))+sizeof(int)+sizeof(float)+sizeof(double)+sizeof(long);
-    void *paciente=malloc(total);
-    char *ptr=(char*)paciente;
-    int cont=0;
-
-    printf("\nNombre: ");
-    scanf(" %[^\n]",ptr+cont);
-    cont+=TAM;
-
-    printf("Edad: ");
-    scanf("%d",(int*)(ptr+cont));
-    cont+=sizeof(int);
-
-    printf("Peso: ");
-    scanf("%f",(float*)(ptr+cont));
-    cont+=sizeof(float);
-
-    printf("Estatura: ");
-    scanf("%lf",(double*)(ptr+cont));
-    cont+=sizeof(double);
-
-    printf("ID: ");
-    scanf("%ld",(long*)(ptr+cont));
-
-    fseek(archivo,0,SEEK_END);
-    fwrite(paciente,total,1,archivo);
-
-    printf("\nRegistro guardado");
-    free(paciente);
-}
 
 // Salto a un byte especifico, descargo el bloque de memoria del paciente y lo desgloso en pantalla.
 void CDiccionario::consultarRegistro(){
@@ -369,32 +395,50 @@ void CDiccionario::consultarEntidades(){
     long cab=getCabEntidades();
     while(cab!=-1){
         actual=leeEntidad(cab);
-        printf("\n%s|%ld|%ld|%ld\n",actual.nombre,actual.atr,actual.data,actual.sig);
+        printf("\n|%s\t\t| atr > %ld \t| data > %ld \t| sig > %ld \t|\n",actual.nombre,actual.atr,actual.data,actual.sig);
         cab=actual.sig;
     }
 }
 
-// ====================== FUNCIONES NUEVAS DE ATRIBUTOS ====================== //
-
+//---------------------------------------====================== FUNCIONES NUEVAS DE ATRIBUTOS ======================---------------------------------------------------------------------------------
+///acl
 // Checo si hay entidades, pregunto por cual trabajar y la cargo en memoria como mi entidad 'activa'.
 bool CDiccionario::activarEntidad(){
-    if(getCabEntidades()==-1){
-        printf("\nError: No hay entidades registradas.\n");
+    if(getCabEntidades()==-1)
+    {
+        cout << ROJO <<"\nERROR:" << RESET;
+        cout << "No hay entidades registradas\n";
         return false;
     }
+
     Entidad temp;
     printf("\nEn cual entidad desea trabajar? ");
     scanf(" %[^\n]",temp.nombre);
 
     long d=buscaEntidad(temp);
-    if(d!=-1){
+    if(d!=-1)
+    {
         diractiva=d;
         activa=leeEntidad(d);
         return true;
     }
-    printf("\nError: La entidad no existe.\n");
+    cout << ROJO << "\nERROR:" << RESET;
+    cout << "La entidad no existe\n";
     return false;
 }
+
+void CDiccionario::altaAtributo()
+{
+    Atributo nuevoA = capturaAtributo();
+    if(buscaAtributo(nuevoA.nombre)!=-1)
+    {
+        long dir = escribeAtributo(nuevoA);
+        insertaAtributo(nuevoA, dir);
+    }else
+    cout << "Ese atributo no existe";
+}
+
+
 
 // Voy a la direccion que me pasen en disco y descargo la estructura de ese atributo en especifico.
 Atributo CDiccionario::leeAtributo(long dir){
@@ -422,9 +466,9 @@ void CDiccionario::reescribeAtributo(long dir,Atributo atr){
 // Pido la configuracion completa para el nuevo atributo y pongo su apuntador siguiente en nulo (-1).
 Atributo CDiccionario::capturaAtributo(){
     Atributo nuevaA;
-    printf("Dame el nombre: ");
+    printf("Dame el nombre: \n");
     scanf("%s",nuevaA.nombre);
-    printf("Ingresa de que tipo es: \n  1)char, 2)int, 3)float, 4)double, 5)long\n");
+    printf("\n\tIngresa de que tipo es:\n  \n\t1.char, \n\t2.int, \n\t3.float, \n\t4.double, \n\t5.long\n");
     scanf("%d",&nuevaA.tipo);
 
     if(nuevaA.tipo==1){
@@ -438,10 +482,24 @@ Atributo CDiccionario::capturaAtributo(){
             case 5: nuevaA.tamano=sizeof(long); break;
         }
     }
-    printf("este atributo es clave primario? (S/N): ");
-    scanf(" %c",&nuevaA.lskp);
-    printf("permite Nulos? (S/N): ");
-    scanf(" %c",&nuevaA.nulo);
+    do
+    {
+        printf("este atributo es clave primario? (s/n): ");
+        scanf(" %c",&nuevaA.lskp);
+    }while(nuevaA.lskp != 's' && nuevaA.lskp != 'n');
+    if(nuevaA.lskp != 's')
+    {
+        do
+        {
+            printf("permite Nulos? (s/n): ");
+            scanf(" %c",&nuevaA.nulo);
+        }while(nuevaA.nulo != 's' && nuevaA.nulo != 'n');
+    }
+     else
+     {
+        cout << "\nNO se permiten nulos si es clave primario\n";
+        nuevaA.nulo = 's';
+     }
     printf("Indique descripcion Para el Producto: ");
     scanf(" %[^\n]",nuevaA.descripcion);
 
@@ -494,7 +552,7 @@ void CDiccionario::insertaAtributo(Atributo nvo,long dir){
 }
 
 // Voy recorriendo los atributos ligados a mi entidad activa para ver si ya tengo uno con ese nombre.
-long CDiccionario::buscaAtributo(char *atr){
+long CDiccionario::buscaAtributo(char  *atr){
     long cab=activa.atr;
     Atributo actual;
     while(cab!=-1){
@@ -511,10 +569,14 @@ long CDiccionario::buscaAtributo(char *atr){
 void CDiccionario::consultarAtributo(){
     Atributo nvo;
     long cab=activa.atr;
+    if(cab == -1){
+        printf("\nNo hay ningun atributo\n");
+    }else{
     while(cab!=-1){
         nvo=leeAtributo(cab);
-        printf("%s, %d, %d, %c, %c, %s\n",nvo.nombre,nvo.tipo,nvo.tamano,nvo.lskp,nvo.nulo,nvo.descripcion);
+        printf("| %s | %d | %d | %c | %c | %s |\n",nvo.nombre,nvo.tipo,nvo.tamano,nvo.lskp,nvo.nulo,nvo.descripcion);
         cab=nvo.sig;
+        }
     }
 }
 
@@ -584,29 +646,67 @@ void CDiccionario::modificaAtributo()
 
 }
 
-// Cascaron en proceso para borrar registros.
-void CDiccionario::eliminaRegistro(){
-    printf("\nEliminar registro...");
+//-------------------------------------------------------------------------BLOQUES-----------------------------------------------------------------------------------------------------
+
+/// verificaciones->
+/// 1.- Si hay Bloques no se permite: modificar/eliminar atributos.
+/// 2.- Solo entramos a Bloques si hay 1 sola clave primaria.
+
+void CDiccionario::cargaAtributos()
+{
+    long cab = activa.atr;
+    int id_n = 1;
+    int contPk = 0;
+
+    tambloque = sizeof(long);
+    nAtributos = 0;
+
+    if (activa.atr == -1)
+    {
+        cout << ROJO << "\nERROR:" << RESET;
+        printf("La entidad activa no tiene atributos\n");
+        return;
+    }
+    while (cab != -1)
+    {
+        Atributo actual = leeAtributo(cab);
+
+        if (actual.lskp == 'S' || actual.lskp == 's') {
+            contPk++;       //se valida que solo pueda tener una sola clave primaria
+            arrAtributo[0] = actual;
+        } else {
+            arrAtributo[id_n] = actual;
+            id_n++;
+        }
+        tambloque += actual.tamano;
+        nAtributos++;
+        cab = actual.sig;
+    }
+    if (contPk == 0)
+    {
+        printf("\nError: La entidad no tiene clave primaria (KP).\n");
+        return;
+    } else if (contPk > 1)
+    {
+        cout << ROJO << "\nERROR:" << RESET;
+        cout << "La entidad tiene mas de una clave primaria\nPara poder acceder a bloques la entidad solo debera contar con una clave primaria" << RESET;
+        return;
+    }
 }
 
-// Cascaron en proceso para modificar registros.
-void CDiccionario::modificaRegistro(){
-    printf("\nModificar registro...");
-}
-
-//Funciones de bloques
-
-void *CDiccionario::capturaBloque(){
-    void *bloque = malloc(tambloque);
+void* CDiccionario::capturaBloque()
+{
+    void* bloque = malloc(tambloque);
     long desp = 0;
 
-    // inicializar sig en -1
+
     *(long *)((char *)bloque + desp) = -1;
     desp += sizeof(long);
 
-    for(int i = 0; i < nAtributos; i++){
+    for(int i = 0; i < nAtributos; i++)
+    {
         switch(arrAtributo[i].tipo){
-            case 1: // char/cadena
+            case 1:
                 printf("Ingresa %s: ", arrAtributo[i].nombre);
                 scanf(" %[^\n]", (char *)bloque + desp);
                 break;
@@ -631,6 +731,35 @@ void *CDiccionario::capturaBloque(){
     }
     return bloque;
 }
+
+
+long CDiccionario::buscaBloque(void *key)
+{
+
+    if (activa.data == -1) {
+        return -1;
+    }
+
+    long cab = activa.data;
+    void *actual;
+
+    while (cab != -1) {
+        actual = leeBloque(cab);
+
+        if (comparaBloques(key, actual) == 0) {
+
+            free(actual);
+            return cab;
+        }
+
+        long sig = *(long *)((char *)actual);
+        free(actual);
+        cab = sig;
+    }
+
+    return -1;
+}
+
 
 int CDiccionario::comparaBloques(void *b1, void *b2){
     long desp = sizeof(long); // saltarse el sig, comparar desde el KP
@@ -672,16 +801,47 @@ void *CDiccionario::leeBloque(long dir){
     fread(bloque, tambloque, 1, archivo);
     return bloque;
 }
+long CDiccionario::escribeBloque(void *bloque)
+{
+    fseek(archivo, 0, SEEK_END);
+    long dir = ftell(archivo);
+    fwrite(bloque, tambloque, 1, archivo);
+    return (dir);
+}
 
 void CDiccionario::reescribeBloque(void *bloque, long dir){
     fseek(archivo, dir, SEEK_SET);
     fwrite(bloque, tambloque, 1, archivo);
 }
 
-void CDiccionario::reescribeBloque(void *bloque, long dir)
+void CDiccionario::consultaBloques()
 {
-    fseek(arch, dir, SEEK_SET);
-    fwrite(bloque, tamBloque, 1, arch);
+    for(int i=0; i<nAtributos; i++)
+        printf("%s", arrAtributo[i].nombre);
+
+    long cab = activa.data;
+    while(cab != -1)
+    {
+       void *bloque = leeBloque(cab);
+        cout << *((long *)((char*)bloque + 0));
+        long desp = sizeof(long);
+        for(int i=0; i<nAtributos; i++)
+        {
+            switch(arrAtributo[i].tipo)
+            {
+                case 1: cout << ((char*)(char *)(bloque + desp)); break;
+                case 2: cout << *((int *)((char *)bloque + desp)); break;
+                case 3: cout << *(float *)(bloque + desp); break;
+                case 4: cout << *(double *)(bloque + desp); break;
+                case 5: cout << *(long *)(bloque + desp); break;
+            }
+            desp += arrAtributo[i].tamano;
+        }
+        cout<<endl;
+        long sig = *(long *)(bloque);
+        free(bloque);
+        cab = sig ;
+    }
 }
 
 void CDiccionario::insertaBloque(void *nvo, long dirnvo){
@@ -715,7 +875,7 @@ void CDiccionario::insertaBloque(void *nvo, long dirnvo){
     }
 }
 
-void CDiccionario::eliminaBloque(){
+void CDiccionario::eliminaBloque(void *bloq){
     cargaAtributos();
     void *llave = capturaBloque();
 
@@ -750,44 +910,47 @@ void CDiccionario::eliminaBloque(){
         cab = *(long *)((char *)act);
     }
     printf("\nError: bloque no encontrado.\n");
-    free(bloqueant); free(llave);
+    free(bloqueant);
+    free(llave);
 }
 
-void CDiccionario::modificaBloque(){
-    cargaAtributos();
-    void *llave = capturaBloque(); // captura solo KP para buscar
+void CDiccionario::modificaBloque()
+{
+    void *nombre = pidaClaveBloque();
+    long dirA =buscaBloque(nombre);
+    if(dirA != -1)
+    {
+        cout <<"\nIngresa la nueva informacion\n";
+        void *nuevo = capturaBloque();
+        long dirB = buscaBloque(nuevo);
+        if(dirB == -1 || dirB == dirA)
+        {
+            if (dirB == dirA)
+            {
+                reescribeBloque(nuevo, dirA);
+            }
+            eliminaBloque(nombre);
+            insertaBloque(nuevo, dirA);
+            cout << ROJO << "Registro modificado" << RESET;
+        }else
+            std::cout << ROJO << "Existe un registro con esta clave" << RESET <<  std::endl;
 
-    long dir = buscaBloque(llave);
-    if(dir == -1){
-        printf("\nError: bloque no encontrado.\n");
-        free(llave); return;
+    }else
+    cout << ROJO << "No existe el bloque" << RESET;
+}
+
+void *CDiccionario::pidaClaveBloque()
+{
+    void *bloqPK = malloc(tambloque);
+    long desp = sizeof(long);
+    printf("\nIngresa la clave %s ", arrAtributo[0].nombre);
+    switch(arrAtributo[0].tipo)
+    {
+        case 1: scanf(" %[^\n]", (char *)bloqPK + desp); break;
+        case 2: scanf("%d", ((int *)((char *)bloqPK + desp))); break;
+        case 3: scanf("%f", ((float *)((char *)bloqPK + desp))); break;
+        case 4: scanf("%lf", ((double *)((char *)bloqPK + desp))); break;
+        case 5: scanf("%ld", ((long *)((char *)bloqPK + desp))); break;
     }
-
-    void *bloque = leeBloque(dir);
-    long desp = sizeof(long) + arrAtributo[0].tamano; // saltar sig + KP
-
-    for(int i = 1; i < nAtributos; i++){
-        printf("Nuevo valor para %s: ", arrAtributo[i].nombre);
-        switch(arrAtributo[i].tipo){
-            case 1:
-                scanf(" %[^\n]", (char *)bloque + desp);
-                break;
-            case 2:
-                scanf("%d", (int *)((char *)bloque + desp));
-                break;
-            case 3:
-                scanf("%f", (float *)((char *)bloque + desp));
-                break;
-            case 4:
-                scanf("%lf", (double *)((char *)bloque + desp));
-                break;
-            case 5:
-                scanf("%ld", (long *)((char *)bloque + desp));
-                break;
-        }
-        desp += arrAtributo[i].tamano;
-    }
-    reescribeBloque(bloque, dir);
-    free(bloque); free(llave);
-    printf("\nBloque modificado.\n");
+    return bloqPK;
 }
